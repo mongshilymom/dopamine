@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Play, Pause, Square, RotateCcw, Settings, Timer, Coffee } from 'lucide-react'
-import { useAppStore } from '../stores/app'
+import { useAppStore } from './app'
 
 export const FocusTimer: React.FC = () => {
   const { 

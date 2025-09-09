@@ -1,14 +1,30 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { supabase } from '../utils/supabase'
-import type { 
-  Profile, 
-  SinceWakeStats, 
-  TimerState, 
-  NoiseState, 
-  IfThenPlan,
-  Event
-} from '../types'
+import { supabase } from './supabase'
+import type { Database } from './database'
+
+type Profile = Database['public']['Tables']['profiles']['Row']
+type SinceWakeStats = {
+  wake_time: string
+  sessions_count: number
+  completed_sessions: number
+  total_minutes: number
+  tasks_completed: number
+}
+type TimerState = {
+  isActive: boolean
+  isPaused: boolean
+  timeLeft: number
+  duration: number
+  sessionType: 'focus' | 'break'
+  taskTitle: string
+}
+type NoiseState = {
+  type: 'off' | 'white' | 'pink'
+  volume: number
+}
+type IfThenPlan = Database['public']['Tables']['plans']['Row']
+type Event = Database['public']['Tables']['events']['Row']
 
 interface AppStore {
   // Auth state

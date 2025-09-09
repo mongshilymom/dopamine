@@ -1,8 +1,30 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Clock, MapPin, Heart, Users, Edit3, Check, Zap } from 'lucide-react'
-import { useAppStore } from '../stores/app'
-import type { IfThenTemplate, IfThenPlan } from '../types'
+import { useAppStore } from './app'
+type IfThenTemplate = {
+  id: string
+  name: string
+  description: string
+  category: string
+  if_condition: string
+  then_action: string
+  evidence_note: string
+}
+
+type IfThenPlan = {
+  id: string
+  user_id: string
+  title: string
+  if_condition: string
+  then_action: string
+  category: string
+  is_active: boolean
+  trigger_count: number
+  last_triggered_at?: string
+  created_at: string
+  updated_at: string
+}
 
 // Evidence-based If-Then templates (d≈0.65 effect size according to Gollwitzer & Sheeran, 2006)
 const IF_THEN_TEMPLATES: IfThenTemplate[] = [

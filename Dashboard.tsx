@@ -10,8 +10,7 @@ import {
   CheckCircle,
   Zap
 } from 'lucide-react'
-import { useAppStore } from '../stores/app'
-import type { SinceWakeStats } from '../types'
+import { useAppStore } from './app'
 
 export const Dashboard: React.FC = () => {
   const { 

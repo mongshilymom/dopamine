@@ -8,11 +8,11 @@ import {
   BarChart3,
   Loader2
 } from 'lucide-react'
-import { useAppStore } from './stores/app'
-import { Dashboard } from './components/Dashboard'
-import { FocusTimer } from './components/FocusTimer'
-import { IfThenPlanner } from './components/IfThenPlanner'
-import { NoisePlayer } from './components/NoisePlayer'
+import { useAppStore } from './app'
+import { Dashboard } from './Dashboard'
+import { FocusTimer } from './FocusTimer'
+import { IfThenPlanner } from './IfThenPlanner'
+import { NoisePlayer } from './NoisePlayer'
 
 type Tab = 'dashboard' | 'timer' | 'planner' | 'noise' | 'stats'
 
