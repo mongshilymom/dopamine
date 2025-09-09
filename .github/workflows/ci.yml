@@ -1,6 +1,7 @@
 # .github/workflows/ci.yml
-name: ci
+name: CI
 on: [pull_request]
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -9,14 +10,13 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
       - run: npm ci
-      - run: npm run build
+      - run: npm run build  # Vite는 <root>/index.html을 엔트리로 빌드합니다
   claude-review:
-    runs-on: ubuntu-latest
     needs: build
+    runs-on: ubuntu-latest
     steps:
       - uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}  # Settings > Secrets > Actions
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          task: "Review this PR and propose/apply fixes if build/test fail"
-
+          task: "Review this PR. If build failed or issues found, propose/apply fixes and open/update PR."
