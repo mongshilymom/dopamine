@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
-import type { TimerState } from '@/types/app'
+import type { TimerState } from '../types/index'
 import { useAppStore } from './app'
 
 interface TimerStore extends TimerState {

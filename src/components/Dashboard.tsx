@@ -10,7 +10,7 @@ import {
   CheckCircle,
   Zap
 } from 'lucide-react'
-import { useAppStore } from './app'
+import { useAppStore } from '../stores/app'
 
 export const Dashboard: React.FC = () => {
   const { 

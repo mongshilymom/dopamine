@@ -17,7 +17,7 @@ import 'chartjs-adapter-date-fns';
 import { format, subDays } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { Calendar, Clock, Target, TrendingUp, Award } from 'lucide-react';
-import { useAppStore } from './app';
+import { useAppStore } from '../stores/app';
 
 // Register Chart.js components
 ChartJS.register(

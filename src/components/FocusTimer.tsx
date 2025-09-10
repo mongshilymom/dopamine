@@ -1,7 +1,10 @@
+import { supabase } from '../lib/supabase'
+
 import React, { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Play, Pause, Square, RotateCcw, Settings, Timer, Coffee } from 'lucide-react'
-import { useAppStore } from './app'
+import { useAppStore } from '../stores/app'
+
 
 export const FocusTimer: React.FC = () => {
   const { 
@@ -39,38 +42,47 @@ export const FocusTimer: React.FC = () => {
     }
   }, [profile])
 
-  // Timer logic
-  useEffect(() => {
-    if (timer.isActive && timeLeft > 0) {
-      intervalRef.current = setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev <= 1) {
-            // Session completed
-            completeSession()
-            return 0
-          }
-          return prev - 1
-        })
-      }, 1000)
-    } else {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-        intervalRef.current = null
-      }
-    }
+// Timer logic (REPLACE THIS EFFECT)
+useEffect(() => {
+  // 타이머 ON && 남은 시간 있을 때만 틱 시작
+  if (!timer.isActive || timeLeft <= 0) return;
 
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
+  const id = window.setInterval(() => {
+    setTimeLeft(prev => {
+      if (prev <= 1) {
+        // 세션 종료
+        if (currentPhase === 'focus') {
+          const minutesDone = profile?.focus_duration ?? 25;
+          const noise = 'off'; // TODO: NoisePlayer 상태 연결 시 교체
+          void saveFocusComplete(minutesDone, noise).catch(console.error);
+        }
+        completeSession();
+        return 0;
       }
-    }
-  }, [timer.isActive, timeLeft, completeSession])
+      return prev - 1;
+    });
+  }, 1000);
+
+  return () => window.clearInterval(id);
+}, [timer.isActive, timeLeft, currentPhase, profile?.focus_duration, completeSession]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
+
+  // --- ADD: 세션 완료 저장 함수 ---
+  async function saveFocusComplete(minutes: number, noise: string) {
+    const { data: { user } } = await supabase.auth.getUser()
+    await supabase.from('events').insert({
+      user_id: user?.id,
+      type: 'focus_complete',
+      minutes,
+      payload: { noise }
+    })
+  }
+
 
   const getPhaseConfig = () => {
     switch (currentPhase) {

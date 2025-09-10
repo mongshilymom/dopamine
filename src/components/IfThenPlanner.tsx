@@ -1,90 +1,79 @@
 import React, { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Plus, Clock, MapPin, Heart, Users, Edit3, Check, Zap } from 'lucide-react'
-import { useAppStore } from './app'
+import { useAppStore } from '../stores/app'
+import { supabase } from '../lib/supabase'
+
+/* ----------------------------- Types & Data ----------------------------- */
+
 type IfThenTemplate = {
   id: string
   name: string
   description: string
-  category: string
+  category: 'time' | 'location' | 'emotional' | 'social' | 'custom'
   if_condition: string
   then_action: string
-  evidence_note: string
+  evidence_note?: string
 }
 
-type IfThenPlan = {
-  id: string
-  user_id: string
-  title: string
-  if_condition: string
-  then_action: string
-  category: string
-  is_active: boolean
-  trigger_count: number
-  last_triggered_at?: string
-  created_at: string
-  updated_at: string
-}
-
-// Evidence-based If-Then templates (d≈0.65 effect size according to Gollwitzer & Sheeran, 2006)
 const IF_THEN_TEMPLATES: IfThenTemplate[] = [
   {
     id: 'morning-email',
     name: 'Morning Email Check',
-    description: 'Limit morning email to prevent attention hijacking',
+    description: '아침 첫 작업을 보호합니다',
     category: 'time',
     if_condition: '아침 9시가 되면',
-    then_action: '이메일을 확인하기 전에 30분 집중 작업을 먼저 하겠습니다',
-    evidence_note: '아침 첫 작업이 하루 집중력을 결정합니다'
+    then_action: '이메일 확인 전에 30분 집중 작업을 먼저 하겠습니다',
+    evidence_note: '아침 첫 작업이 하루 집중력을 결정'
   },
   {
     id: 'distraction-thought',
     name: 'Distraction Management',
-    description: 'Handle intrusive thoughts during focus sessions',
+    description: '집중 중 침입 사고 대응',
     category: 'emotional',
     if_condition: '집중 중 다른 생각이 떠오르면',
-    then_action: '종이에 적고 "나중에 처리"라고 말한 후 즉시 작업으로 돌아가겠습니다',
-    evidence_note: '외재화(externalization)가 working memory 부담을 줄입니다'
+    then_action: '종이에 적고 “나중에 처리”라고 말한 뒤 작업으로 복귀',
+    evidence_note: '외재화가 작업 기억 부담을 완화'
   },
   {
     id: 'break-ritual',
     name: 'Break Transition',
-    description: 'Structure break time for better recovery',
+    description: '휴식 전환 루틴',
     category: 'time',
     if_condition: '25분 집중이 끝나면',
-    then_action: '자리에서 일어나 창문으로 가서 3회 깊게 숨쉬겠습니다',
-    evidence_note: '물리적 이동과 호흡이 정신적 전환을 돕습니다'
+    then_action: '자리에서 일어나 창가로 가서 3회 깊게 호흡',
+    evidence_note: '물리적 이동+호흡이 전환 도움'
   },
   {
     id: 'procrastination-trigger',
     name: 'Procrastination Response',
-    description: 'Combat task avoidance with immediate action',
+    description: '회피 대응 즉시 시작',
     category: 'emotional',
     if_condition: '하기 싫은 일이 생기면',
-    then_action: '2분만 하자고 스스로에게 말하고 즉시 시작하겠습니다',
-    evidence_note: '시작 장벽이 가장 높습니다 (Zeigarnik Effect)'
+    then_action: '“2분만 해보자”라고 말하고 즉시 시작',
+    evidence_note: '시작 장벽이 가장 큼(Zeigarnik)'
   },
   {
     id: 'workspace-setup',
     name: 'Workspace Preparation',
-    description: 'Create consistent environmental cues',
+    description: '환경 트리거 세팅',
     category: 'location',
     if_condition: '책상에 앉으면',
-    then_action: '핸드폰을 다른 방에 두고 물을 준비한 후 타이머를 시작하겠습니다',
-    evidence_note: '환경 조성이 자동 행동을 유발합니다'
+    then_action: '휴대폰을 다른 방에 두고 물 준비 후 타이머 시작',
+    evidence_note: '환경 조성은 자동 행동 유발'
   },
   {
     id: 'interruption-protocol',
-    name: 'Interruption Management',
-    description: 'Handle external distractions effectively',
+    name: 'Interruption Protocol',
+    description: '외부 방해 대응',
     category: 'social',
     if_condition: '누군가가 말을 걸면',
-    then_action: '"지금 집중 중이니 30분 후에 이야기할까요?"라고 정중하게 말하겠습니다',
-    evidence_note: '경계 설정이 집중력 보호에 필수적입니다'
+    then_action: '“지금 집중 중이라 30분 후에 이야기할까요?”라고 제안',
+    evidence_note: '경계 설정=집중력 보호'
   }
 ]
 
-const categoryIcons = {
+const categoryIcons: Record<string, any> = {
   time: Clock,
   location: MapPin,
   emotional: Heart,
@@ -92,7 +81,7 @@ const categoryIcons = {
   custom: Edit3
 }
 
-const categoryColors = {
+const categoryColors: Record<string, string> = {
   time: 'bg-blue-100 text-blue-700',
   location: 'bg-green-100 text-green-700',
   emotional: 'bg-pink-100 text-pink-700',
@@ -100,8 +89,22 @@ const categoryColors = {
   custom: 'bg-gray-100 text-gray-700'
 }
 
+/* ---------------------------- Save to Supabase --------------------------- */
+
+async function saveIfThen(when: string, thenDo: string, category: string, tag?: string) {
+  const { data: { user } } = await supabase.auth.getUser()
+  await supabase.from('events').insert({
+    user_id: user?.id,
+    type: 'ifthen_create',
+    payload: { when, then: thenDo, category, tag }
+  })
+}
+
+/* ------------------------------- Component ------------------------------ */
+
 export const IfThenPlanner: React.FC = () => {
   const { plans, createPlan, triggerPlan, loadPlans, user } = useAppStore()
+
   const [selectedTemplate, setSelectedTemplate] = useState<IfThenTemplate | null>(null)
   const [isCreatingCustom, setIsCreatingCustom] = useState(false)
   const [customPlan, setCustomPlan] = useState({
@@ -111,9 +114,7 @@ export const IfThenPlanner: React.FC = () => {
   })
 
   useEffect(() => {
-    if (user) {
-      loadPlans()
-    }
+    if (user) loadPlans()
   }, [user, loadPlans])
 
   const handleTemplateSelect = (template: IfThenTemplate) => {
@@ -130,6 +131,13 @@ export const IfThenPlanner: React.FC = () => {
       is_active: true
     })
 
+    // 생성 로그 저장
+    await saveIfThen(
+      selectedTemplate.if_condition,
+      selectedTemplate.then_action,
+      selectedTemplate.category
+    )
+
     setSelectedTemplate(null)
   }
 
@@ -141,23 +149,48 @@ export const IfThenPlanner: React.FC = () => {
       is_active: true
     })
 
+    // 생성 로그 저장
+    await saveIfThen(
+      customPlan.if_condition,
+      customPlan.then_action,
+      customPlan.category
+    )
+
     setCustomPlan({ if_condition: '', then_action: '', category: 'custom' })
     setIsCreatingCustom(false)
   }
 
   const handleTriggerPlan = async (planId: string) => {
     await triggerPlan(planId)
+
+    // 실행 로그 저장
+    const plan = plans.find(p => p.id === planId)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (plan && user?.id) {
+      await supabase.from('events').insert({
+        user_id: user.id,
+        type: 'ifthen_trigger',
+        payload: {
+          planId,
+          when: plan.if_condition,
+          then: plan.then_action,
+          category: plan.category
+        }
+      })
+    }
   }
+
+  /* --------------------------------- UI -------------------------------- */
 
   return (
     <div className="p-4 space-y-6">
-      {/* Header with scientific backing */}
+      {/* Header */}
       <div className="text-center space-y-2">
         <h2 className="text-2xl font-bold text-gray-900">If-Then 계획 도구</h2>
         <p className="text-sm text-gray-600 max-w-md mx-auto">
-          "만약 X가 일어나면, Y를 하겠다"식 계획으로 자동적 행동을 만들어보세요.
+          “만약 X가 일어나면, Y를 하겠다” 식 계획으로 자동 행동을 만듭니다.
           <span className="block text-xs text-green-600 mt-1">
-            ✓ 과학적 검증: 목표 달성률 2배 향상 (효과크기 d≈0.65)
+            ✓ 연구 기반: 목표 달성률 향상(효과크기 d≈0.65)
           </span>
         </p>
       </div>
@@ -178,7 +211,7 @@ export const IfThenPlanner: React.FC = () => {
         ) : (
           <div className="space-y-2">
             {plans.map((plan) => {
-              const Icon = categoryIcons[plan.category]
+              const Icon = categoryIcons[plan.category] || Edit3
               return (
                 <motion.div
                   key={plan.id}
@@ -190,7 +223,7 @@ export const IfThenPlanner: React.FC = () => {
                     <div className="flex-1">
                       <div className="flex items-center mb-2">
                         <Icon className="w-4 h-4 mr-2 text-gray-500" />
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${categoryColors[plan.category]}`}>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${categoryColors[plan.category] || categoryColors.custom}`}>
                           {plan.category}
                         </span>
                         {plan.trigger_count > 0 && (
@@ -233,9 +266,9 @@ export const IfThenPlanner: React.FC = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleTemplateSelect(template)}
-                className={`border-2 rounded-lg p-4 cursor-pointer transition-all $${
-                  selectedTemplate?.id === template.id 
-                    ? 'border-red-500 bg-red-50' 
+                className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                  selectedTemplate?.id === template.id
+                    ? 'border-red-500 bg-red-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >

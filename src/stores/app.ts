@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { supabase } from './supabase'
-import type { Database } from './database'
+import { supabase } from '../lib/supabase'
+import type { Database } from '../types/database'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 type SinceWakeStats = {

@@ -10,7 +10,7 @@ import {
   Settings,
   Shield
 } from 'lucide-react'
-import { useAppStore } from './app'
+import { useAppStore } from '../stores/app'
 
 export const NoisePlayer: React.FC = () => {
   const { noise, setNoiseType, setNoiseVolume, profile, updateProfile } = useAppStore()
