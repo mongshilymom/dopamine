@@ -1,0 +1,32 @@
+name: Claude Code Action
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  run-claude:
+    # PR이거나, 댓글에 @claude 가 있을 때만 작동
+    if: github.event_name == 'pull_request' || 
+        (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Claude Code Action
+        uses: anthropics/claude-code-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          enable_review: true        # PR 코드리뷰
+          enable_commit: true        # 제안 적용 커밋
+          apply_suggestions: true    # 자동 적용 허용
+          # model: claude-3-7-sonnet-2025-06-20  # (옵션) 기본 사용으로도 충분
