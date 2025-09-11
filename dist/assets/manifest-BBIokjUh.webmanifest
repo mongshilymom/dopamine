@@ -1,0 +1,75 @@
+{
+  "name": "FOCUS NEXUS - ADHD 집중력 향상 앱",
+  "short_name": "FOCUS NEXUS",
+  "description": "과학적 근거 기반 ADHD 친화적 생산성 앱으로 If-Then 계획, 포모도로 타이머, 집중 노이즈 기능을 제공합니다.",
+  "theme_color": "#ef4444",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "start_url": "/",
+  "lang": "ko",
+  "dir": "ltr",
+  "categories": ["productivity", "health", "education"],
+  "screenshots": [
+    {
+      "src": "screenshot-mobile.png",
+      "type": "image/png",
+      "sizes": "390x844",
+      "form_factor": "narrow"
+    }
+  ],
+  "icons": [
+    {
+      "src": "icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "포모도로 타이머 시작",
+      "short_name": "타이머",
+      "description": "25분 집중 세션을 바로 시작합니다",
+      "url": "/?tab=timer",
+      "icons": [
+        {
+          "src": "icon-timer-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "If-Then 계획 만들기",
+      "short_name": "계획",
+      "description": "새로운 If-Then 실행 의도를 생성합니다",
+      "url": "/?tab=planner",
+      "icons": [
+        {
+          "src": "icon-planner-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
+}

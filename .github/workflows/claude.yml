@@ -1,0 +1,29 @@
+name: Claude Code Action
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request:
+    types: [opened, synchronize, reopened]
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+jobs:
+  run-claude:
+    if: github.event.sender.type == 'User'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
+      - name: Claude Code Action Official
+        uses: anthropics/claude-code-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          enable-issue-comment-trigger: true
+          enable-pr-comment-trigger: true
+          trigger-phrase: "@claude"
