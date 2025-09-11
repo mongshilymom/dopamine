@@ -10,20 +10,18 @@
     "lint": "tsc --noEmit"
   },
   "engines": {
-    "node": "20.x",
-    "npm": ">=10"
+    "node": ">=18 <23"
   },
-  "packageManager": "npm@10.8.2",
   "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "@supabase/supabase-js": "^2.38.4",
+    "zustand": "^4.4.7",
+    "framer-motion": "^10.16.16",
     "chart.js": "^4.4.1",
     "chartjs-adapter-date-fns": "^3.0.0",
     "date-fns": "^2.30.0",
-    "framer-motion": "^10.16.16",
-    "lucide-react": "^0.294.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "zustand": "^4.4.7"
+    "lucide-react": "^0.294.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
@@ -38,6 +36,8 @@
     "postcss": "^8.4.32",
     "tailwindcss": "^3.3.6",
     "typescript": "^5.2.2",
-    "vite": "^5.0.8"
+    "vite": "^5.0.8",
+    "vite-plugin-pwa": "^0.17.4",
+    "workbox-window": "^7.0.0"
   }
 }
