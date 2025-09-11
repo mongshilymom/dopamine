@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 // 아래 파일 경로는 형의 실제 파일 위치에 따라 다를 수 있습니다.
-import { ensureAnonSession } from './lib/auth/anon.ts' 
+import { ensureAnonSession } from './lib/supabase.ts' 
 
 // 1. main이라는 이름의 async 함수(비동기 작업 상자)를 만듭니다.
 async function main() {
